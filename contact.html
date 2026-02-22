@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제휴 문의 | 미니 게임 허브</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    .back-link {
+      align-self: flex-start;
+      margin-bottom: 24px;
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { color: #f0c040; }
+
+    h1 { font-size: 2rem; margin-bottom: 6px; color: #f0c040; }
+    .subtitle { color: #888; margin-bottom: 36px; font-size: 0.9rem; }
+
+    .form-card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .field { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: #f0c040;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid #1e3a6e;
+      background: #0d1626;
+      color: #eee;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #f0c040;
+    }
+
+    select option { background: #0d1626; }
+
+    textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      background: #f0c040;
+      color: #1a1a2e;
+      margin-top: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover { background: #f5d060; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { background: #555; color: #999; cursor: not-allowed; }
+
+    /* 전송 후 성공 메시지 */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 32px 16px;
+    }
+    .success-msg .check { font-size: 3rem; margin-bottom: 16px; }
+    .success-msg h2 { color: #f0c040; margin-bottom: 10px; }
+    .success-msg p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+
+    .required { color: #e74c3c; margin-left: 2px; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← 게임 허브로 돌아가기</a>
+
+  <h1>제휴 문의</h1>
+  <p class="subtitle">광고, 제휴, 협업 등 비즈니스 문의를 남겨주세요</p>
+
+  <div class="form-card">
+    <form id="contact-form" action="https://formspree.io/f/xzdajkyo" method="POST">
+
+      <div class="field">
+        <label for="name">이름 <span class="required">*</span></label>
+        <input type="text" id="name" name="name" placeholder="홍길동" required>
+      </div>
+
+      <div class="field">
+        <label for="email">이메일 <span class="required">*</span></label>
+        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+      </div>
+
+      <div class="field">
+        <label for="company">회사 / 채널명</label>
+        <input type="text" id="company" name="company" placeholder="(선택)">
+      </div>
+
+      <div class="field">
+        <label for="type">문의 유형 <span class="required">*</span></label>
+        <select id="type" name="inquiry_type" required>
+          <option value="" disabled selected>선택해주세요</option>
+          <option value="광고 제휴">광고 제휴</option>
+          <option value="콘텐츠 협업">콘텐츠 협업</option>
+          <option value="서비스 입점">서비스 입점</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="message">문의 내용 <span class="required">*</span></label>
+        <textarea id="message" name="message" placeholder="제휴 목적과 내용을 간략히 설명해주세요." required></textarea>
+      </div>
+
+      <!-- Formspree 스팸 방지 -->
+      <input type="text" name="_gotcha" style="display:none">
+
+      <button type="submit" class="btn" id="submit-btn">문의 보내기</button>
+    </form>
+
+    <div class="success-msg" id="success-msg">
+      <div class="check">✅</div>
+      <h2>문의가 접수되었습니다</h2>
+      <p>빠른 시일 내에 입력하신 이메일로<br>답변 드리겠습니다. 감사합니다!</p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('contact-form');
+    const btn = document.getElementById('submit-btn');
+    const successMsg = document.getElementById('success-msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' }
+        });
+
+        if (res.ok) {
+          form.style.display = 'none';
+          successMsg.style.display = 'block';
+        } else {
+          alert('전송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+          btn.disabled = false;
+          btn.textContent = '문의 보내기';
+        }
+      } catch {
+        alert('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        btn.disabled = false;
+        btn.textContent = '문의 보내기';
+      }
+    });
+  </script>
+</body>
+</html>
