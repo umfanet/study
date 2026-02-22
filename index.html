@@ -84,6 +84,25 @@
       transition: color 0.15s, border-color 0.15s;
     }
     .contact-link:hover { color: #f0c040; border-color: #f0c040; }
+
+    .comments-section {
+      width: 100%;
+      max-width: 720px;
+      margin-top: 60px;
+      border-top: 1px solid #0f3460;
+      padding-top: 40px;
+    }
+
+    .comments-title {
+      font-size: 1rem;
+      color: #f0c040;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Disqus 다크 배경 맞춤 */
+    #disqus_thread { color-scheme: dark; }
   </style>
 </head>
 <body>
@@ -104,5 +123,23 @@
   </div>
 
   <a href="contact.html" class="contact-link">제휴 문의</a>
+
+  <section class="comments-section">
+    <p class="comments-title">댓글</p>
+    <div id="disqus_thread"></div>
+    <script>
+      var disqus_config = function () {
+        this.page.url = 'https://umfanet.github.io/study/';
+        this.page.identifier = 'mini-game-hub-index';
+      };
+      (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://umfastudy.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>댓글을 보려면 JavaScript를 활성화해주세요. (<a href="https://disqus.com/?ref_noscript">Disqus</a>)</noscript>
+  </section>
 </body>
 </html>
