@@ -15,8 +15,17 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 40px 20px;
+      padding: 32px 20px;
     }
+
+    .back-link {
+      align-self: flex-start;
+      margin-bottom: 24px;
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { color: #f0c040; }
 
     h1 {
       font-size: 2rem;
@@ -116,6 +125,7 @@
   </style>
 </head>
 <body>
+  <a href="index.html" class="back-link">← 게임 허브로 돌아가기</a>
 
   <h1>로또 번호 생성기</h1>
   <p class="subtitle">1~45 중 6개 번호를 자동 추첨합니다</p>

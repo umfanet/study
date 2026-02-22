@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사다리 게임</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+    }
+
+    .back-link {
+      align-self: flex-start;
+      margin-bottom: 24px;
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { color: #f0c040; }
+
+    h1 { font-size: 2rem; margin-bottom: 6px; color: #f0c040; }
+    .subtitle { color: #888; margin-bottom: 32px; font-size: 0.9rem; }
+
+    .card {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 0.78rem;
+      color: #f0c040;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 12px;
+    }
+
+    .count-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .ico-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid #334e80;
+      background: none;
+      color: #eee;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .ico-btn:hover { border-color: #f0c040; color: #f0c040; }
+
+    .count-val { font-size: 1rem; min-width: 36px; text-align: center; }
+
+    .section-label {
+      font-size: 0.8rem;
+      color: #556;
+      margin-bottom: 8px;
+    }
+
+    .inputs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .inputs-row input {
+      width: 88px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: 1px solid #1e3a6e;
+      background: #0d1626;
+      color: #eee;
+      font-size: 0.88rem;
+      text-align: center;
+      transition: border-color 0.15s;
+    }
+    .inputs-row input:focus { outline: none; border-color: #f0c040; }
+
+    .btn-row { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 11px 28px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      background: #f0c040;
+      color: #1a1a2e;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover { background: #f5d060; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #f0c040;
+      color: #f0c040;
+    }
+    .btn-outline:hover { background: rgba(240, 192, 64, 0.08); }
+
+    #ladder-wrap {
+      width: 100%;
+      max-width: 700px;
+      overflow-x: auto;
+      display: none;
+      margin-bottom: 24px;
+    }
+
+    #ladder-svg { display: block; margin: 0 auto; }
+
+    #result-list {
+      width: 100%;
+      max-width: 600px;
+      display: none;
+    }
+
+    .result-row {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 12px;
+      padding: 13px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.3s;
+    }
+    .result-row.revealed { border-color: #f0c040; }
+
+    .rr-name { font-weight: bold; min-width: 72px; }
+    .rr-arrow { color: #334e80; }
+    .rr-val { color: #eee; flex: 1; }
+    .rr-val.hidden { color: #2a3a5a; }
+
+    .reveal-btn {
+      background: none;
+      border: 1px solid #334e80;
+      border-radius: 8px;
+      color: #888;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .reveal-btn:hover { border-color: #f0c040; color: #f0c040; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← 게임 허브로 돌아가기</a>
+
+  <h1>사다리 게임</h1>
+  <p class="subtitle">참가자와 결과를 입력하고 사다리를 생성하세요</p>
+
+  <div class="card">
+    <div class="card-title">참가자 설정</div>
+    <div class="count-row">
+      <button class="ico-btn" onclick="changeCount(-1)">−</button>
+      <span class="count-val" id="count-label">4명</span>
+      <button class="ico-btn" onclick="changeCount(1)">+</button>
+    </div>
+
+    <div class="section-label">참가자 이름</div>
+    <div class="inputs-row" id="player-inputs"></div>
+
+    <div class="section-label" style="margin-top:14px;">결과 항목</div>
+    <div class="inputs-row" id="result-inputs"></div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="generateLadder()">사다리 생성</button>
+      <button class="btn btn-outline" onclick="revealAll()">전체 공개</button>
+    </div>
+  </div>
+
+  <div id="ladder-wrap">
+    <svg id="ladder-svg"></svg>
+  </div>
+
+  <div id="result-list"></div>
+
+  <script>
+    const COLORS = ['#f0c040','#e74c3c','#27ae60','#4a90d9','#9b59b6','#e67e22','#1abc9c','#ff6b9d'];
+    const DEFAULT_PLAYERS = ['철수','영희','민수','지영','상현','나연','준호','서연'];
+    const DEFAULT_RESULTS = ['꽝','치킨','아이스크림','1등','2등','3등','꽝꽝','음료수'];
+
+    const COL_SPACING = 84;
+    const LEVEL_SPACING = 28;
+    const PAD_X = 56;
+    const PAD_TOP = 56;
+    const PAD_BOTTOM = 56;
+
+    let playerCount = 4;
+    let bridges = [];
+    let resultMap = {};
+    let revealed = {};
+    let ladderGenerated = false;
+    let ladderLevels = 0;
+
+    function colX(c) { return PAD_X + c * COL_SPACING; }
+    function levelY(lv) { return PAD_TOP + lv * LEVEL_SPACING; }
+    function bridgeY(lv) { return PAD_TOP + (lv + 0.5) * LEVEL_SPACING; }
+
+    function changeCount(delta) {
+      playerCount = Math.max(2, Math.min(8, playerCount + delta));
+      document.getElementById('count-label').textContent = `${playerCount}명`;
+      renderInputs();
+    }
+
+    function renderInputs() {
+      const pi = document.getElementById('player-inputs');
+      const ri = document.getElementById('result-inputs');
+      pi.innerHTML = '';
+      ri.innerHTML = '';
+      for (let i = 0; i < playerCount; i++) {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.value = DEFAULT_PLAYERS[i] || `참가자${i + 1}`;
+        inp.id = `p-${i}`;
+        pi.appendChild(inp);
+
+        const res = document.createElement('input');
+        res.type = 'text';
+        res.value = DEFAULT_RESULTS[i] || `결과${i + 1}`;
+        res.id = `r-${i}`;
+        ri.appendChild(res);
+      }
+    }
+
+    function getPlayers() {
+      return Array.from({ length: playerCount }, (_, i) =>
+        document.getElementById(`p-${i}`).value.trim() || `참가자${i + 1}`
+      );
+    }
+
+    function getResults() {
+      return Array.from({ length: playerCount }, (_, i) =>
+        document.getElementById(`r-${i}`).value.trim() || `결과${i + 1}`
+      );
+    }
+
+    // Generate random horizontal bridges (no two bridges at same level share a column)
+    function generateBridges(n, levels) {
+      const result = [];
+      for (let lv = 0; lv < levels; lv++) {
+        const used = new Set();
+        for (let c = 0; c < n - 1; c++) {
+          if (!used.has(c) && !used.has(c + 1) && Math.random() < 0.42) {
+            result.push({ level: lv, col: c });
+            used.add(c);
+            used.add(c + 1);
+          }
+        }
+      }
+      return result;
+    }
+
+    // Find bridge at a given level that affects the given column
+    function findBridge(lv, col) {
+      return bridges.find(b => b.level === lv && (b.col === col || b.col === col - 1));
+    }
+
+    // Compute end column for each starting player
+    function computeResultMap(n, levels) {
+      const map = {};
+      for (let s = 0; s < n; s++) {
+        let col = s;
+        for (let lv = 0; lv < levels; lv++) {
+          const b = findBridge(lv, col);
+          if (b) col = b.col === col ? col + 1 : col - 1;
+        }
+        map[s] = col;
+      }
+      return map;
+    }
+
+    // Build SVG path string for a player's traced route
+    function buildPath(start, levels) {
+      let col = start;
+      let d = `M ${colX(col)} ${PAD_TOP}`;
+      for (let lv = 0; lv < levels; lv++) {
+        const b = findBridge(lv, col);
+        if (b) {
+          d += ` L ${colX(col)} ${bridgeY(lv)}`;
+          col = b.col === col ? col + 1 : col - 1;
+          d += ` L ${colX(col)} ${bridgeY(lv)}`;
+        }
+      }
+      d += ` L ${colX(col)} ${PAD_TOP + levels * LEVEL_SPACING}`;
+      return d;
+    }
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      return el;
+    }
+
+    function generateLadder() {
+      const n = playerCount;
+      const levels = Math.max(8, n * 2 + 2);
+      ladderLevels = levels;
+      bridges = generateBridges(n, levels);
+      resultMap = computeResultMap(n, levels);
+      revealed = {};
+      ladderGenerated = true;
+
+      const players = getPlayers();
+      const results = getResults();
+      const W = PAD_X * 2 + (n - 1) * COL_SPACING;
+      const H = PAD_TOP + levels * LEVEL_SPACING + PAD_BOTTOM;
+
+      const svg = document.getElementById('ladder-svg');
+      svg.innerHTML = '';
+      svg.setAttribute('width', W);
+      svg.setAttribute('height', H);
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+      // Layer groups for proper z-order
+      const gridGroup = svgEl('g', { id: 'grid' });
+      const pathGroup = svgEl('g', { id: 'paths' });
+      const labelGroup = svgEl('g', { id: 'labels' });
+      svg.appendChild(gridGroup);
+      svg.appendChild(pathGroup);
+      svg.appendChild(labelGroup);
+
+      // Vertical lines
+      for (let c = 0; c < n; c++) {
+        gridGroup.appendChild(svgEl('line', {
+          x1: colX(c), y1: PAD_TOP,
+          x2: colX(c), y2: PAD_TOP + levels * LEVEL_SPACING,
+          stroke: '#1e3a6e', 'stroke-width': 3, 'stroke-linecap': 'round'
+        }));
+      }
+
+      // Horizontal bridges
+      bridges.forEach(b => {
+        gridGroup.appendChild(svgEl('line', {
+          x1: colX(b.col), y1: bridgeY(b.level),
+          x2: colX(b.col + 1), y2: bridgeY(b.level),
+          stroke: '#2a5298', 'stroke-width': 3, 'stroke-linecap': 'round'
+        }));
+      });
+
+      // Player labels at top
+      players.forEach((name, i) => {
+        const bg = svgEl('rect', {
+          x: colX(i) - 30, y: 8, width: 60, height: 30,
+          rx: 8, fill: '#16213e', stroke: '#1e3a6e', 'stroke-width': 1.5,
+          style: 'cursor:pointer', class: `p-box p-box-${i}`
+        });
+        bg.addEventListener('click', () => revealPlayer(i));
+        labelGroup.appendChild(bg);
+
+        const txt = svgEl('text', {
+          x: colX(i), y: 28,
+          'text-anchor': 'middle', fill: '#f0c040',
+          'font-size': 12, 'font-family': 'Segoe UI, sans-serif',
+          'font-weight': 'bold', style: 'cursor:pointer'
+        });
+        txt.textContent = name;
+        txt.addEventListener('click', () => revealPlayer(i));
+        labelGroup.appendChild(txt);
+      });
+
+      // Result labels at bottom
+      results.forEach((res, i) => {
+        labelGroup.appendChild(svgEl('rect', {
+          x: colX(i) - 30, y: PAD_TOP + levels * LEVEL_SPACING + 8,
+          width: 60, height: 30, rx: 8,
+          fill: '#16213e', stroke: '#1e3a6e', 'stroke-width': 1.5
+        }));
+
+        const txt = svgEl('text', {
+          x: colX(i), y: PAD_TOP + levels * LEVEL_SPACING + 28,
+          'text-anchor': 'middle', fill: '#778',
+          'font-size': 12, 'font-family': 'Segoe UI, sans-serif'
+        });
+        txt.textContent = res;
+        labelGroup.appendChild(txt);
+      });
+
+      document.getElementById('ladder-wrap').style.display = 'block';
+      renderResultList(players);
+    }
+
+    function revealPlayer(idx) {
+      if (!ladderGenerated || revealed[idx]) return;
+      revealed[idx] = true;
+
+      const color = COLORS[idx % COLORS.length];
+      const d = buildPath(idx, ladderLevels);
+
+      const pathEl = svgEl('path', {
+        d, fill: 'none',
+        stroke: color, 'stroke-width': 4.5,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+      });
+
+      document.getElementById('paths').appendChild(pathEl);
+
+      // Animate draw via stroke-dashoffset
+      const len = pathEl.getTotalLength();
+      pathEl.style.strokeDasharray = len;
+      pathEl.style.strokeDashoffset = len;
+      pathEl.getBoundingClientRect(); // force reflow
+      pathEl.style.transition = 'stroke-dashoffset 1.2s ease';
+      pathEl.style.strokeDashoffset = '0';
+
+      // Highlight player box
+      const box = document.querySelector(`.p-box-${idx}`);
+      if (box) {
+        box.setAttribute('stroke', color);
+        box.setAttribute('fill', '#1e1e0a');
+      }
+
+      updateResultItem(idx);
+    }
+
+    function revealAll() {
+      if (!ladderGenerated) {
+        generateLadder();
+        setTimeout(() => {
+          for (let i = 0; i < playerCount; i++) {
+            setTimeout(() => revealPlayer(i), i * 350);
+          }
+        }, 200);
+        return;
+      }
+      for (let i = 0; i < playerCount; i++) {
+        setTimeout(() => revealPlayer(i), i * 350);
+      }
+    }
+
+    function renderResultList(players) {
+      const list = document.getElementById('result-list');
+      list.style.display = 'block';
+      list.innerHTML = '';
+
+      players.forEach((name, i) => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        row.id = `rr-${i}`;
+
+        const nameEl = document.createElement('span');
+        nameEl.className = 'rr-name';
+        nameEl.textContent = name;
+        nameEl.style.color = COLORS[i % COLORS.length];
+
+        const arrow = document.createElement('span');
+        arrow.className = 'rr-arrow';
+        arrow.textContent = '→';
+
+        const val = document.createElement('span');
+        val.className = 'rr-val hidden';
+        val.id = `rv-${i}`;
+        val.textContent = '???';
+
+        const btn = document.createElement('button');
+        btn.className = 'reveal-btn';
+        btn.id = `rbtn-${i}`;
+        btn.textContent = '공개';
+        btn.onclick = () => revealPlayer(i);
+
+        row.appendChild(nameEl);
+        row.appendChild(arrow);
+        row.appendChild(val);
+        row.appendChild(btn);
+        list.appendChild(row);
+      });
+    }
+
+    function updateResultItem(idx) {
+      const results = getResults();
+      const resultText = results[resultMap[idx]];
+
+      const val = document.getElementById(`rv-${idx}`);
+      const btn = document.getElementById(`rbtn-${idx}`);
+      const row = document.getElementById(`rr-${idx}`);
+
+      if (val) { val.textContent = resultText; val.classList.remove('hidden'); }
+      if (btn) btn.style.display = 'none';
+      if (row) row.classList.add('revealed');
+    }
+
+    // Initialize
+    renderInputs();
+  </script>
+</body>
+</html>
